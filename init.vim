@@ -246,6 +246,7 @@ nmap <silent> .gh :call CocAction('jumpDefinition', 'split')<CR>
 nmap <silent> .gv :call CocAction('jumpDefinition', 'vsplit')<CR>
 nmap <silent> .gd :call CocAction('jumpDefinition', 'tabe')<CR>
 
+
 " Use U to show documentation in preview window
 nnoremap <silent> U :call <SID>show_documentation()<CR>
 
