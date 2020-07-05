@@ -46,21 +46,14 @@ Plug 'bronson/vim-trailing-whitespace'
 Plug 'Raimondi/delimitMate'
 Plug 'majutsushi/tagbar'
 Plug 'w0rp/ale'
-"Plug 'scrooloose/syntastic'
-"Plug 'vim-syntastic/syntastic'
 Plug 'Yggdroot/indentLine'
 Plug 'avelino/vim-bootstrap-updater'
-Plug 'sheerun/vim-polyglot'
-"Plug 'Shougo/neocomplete.vim'
-"Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' } "requires python3
-Plug 'Shougo/deoplete.nvim'
-Plug 'zchee/deoplete-go', { 'do': 'make'}
-Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
-"Plug 'steelsojka/deoplete-flow'
-"Plug 'wokalski/autocomplete-flow'
-"Plug 'Shougo/neosnippet'
-"Plug 'Shougo/neosnippet-snippets'
-
+"Plug 'sheerun/vim-polyglot'
+"Plug 'Shougo/deoplete.nvim'
+"Plug 'zchee/deoplete-go', { 'do': 'make'}
+"Plug 'carlitux/deoplete-ternjs', { 'do': 'npm install -g tern' }
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'nsf/gocode', { 'rtp': 'nvim', 'do': '~/.config/nvim/plugged/gocode/nvim/symlink.sh' }
 Plug 'sbdchd/neoformat'
 
 let g:neoformat_try_formatprg = 1
@@ -150,7 +143,7 @@ call plug#end()
 filetype plugin indent on
 
 "let g:neocomplete#enable_at_startup = 1
-let g:deoplete#enable_at_startup = 1
+"let g:deoplete#enable_at_startup = 1
 " neosnippet
 
 "let g:neosnippet#enable_completed_snippet = 1
@@ -177,8 +170,8 @@ set bomb
 set binary
 
 "" safewrite disable
-"set nowritebackup
-set backupcopy=yes
+set nowritebackup
+"set backupcopy=yes
 
 "" Fix backspace indent
 set backspace=indent,eol,start
@@ -193,7 +186,7 @@ set expandtab
 let mapleader=','
 
 "" Enable hidden buffers
-"set hidden
+set hidden
 
 set splitright
 set splitbelow
@@ -207,6 +200,84 @@ set smartcase
 "" Directories for swp files
 set nobackup
 set noswapfile
+
+" -------------------------------------------------------------------------------------------------
+" coc.nvim default settings
+" -------------------------------------------------------------------------------------------------
+
+" if hidden is not set, TextEdit might fail.
+set hidden
+" Better display for messages
+set cmdheight=2
+" Smaller updatetime for CursorHold & CursorHoldI
+set updatetime=300
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+" always show signcolumns
+set signcolumn=yes
+
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" Use `[c` and `]c` to navigate diagnostics
+nmap <silent> [c <Plug>(coc-diagnostic-prev)
+nmap <silent> ]c <Plug>(coc-diagnostic-next)
+
+" Remap keys for gotos
+nmap <silent> gd <Plug>(coc-definition)
+nmap <silent> gy <Plug>(coc-type-definition)
+nmap <silent> gi <Plug>(coc-implementation)
+nmap <silent> gr <Plug>(coc-references)
+
+nmap <silent> .gh :call CocAction('jumpDefinition', 'split')<CR>
+nmap <silent> .gv :call CocAction('jumpDefinition', 'vsplit')<CR>
+nmap <silent> .gd :call CocAction('jumpDefinition', 'tabe')<CR>
+
+" Use U to show documentation in preview window
+nnoremap <silent> U :call <SID>show_documentation()<CR>
+
+" Remap for rename current word
+nmap <leader>rn <Plug>(coc-rename)
+
+" Remap for format selected region
+vmap <leader>f  <Plug>(coc-format-selected)
+nmap <leader>f  <Plug>(coc-format-selected)
+" Show all diagnostics
+nnoremap <silent> <space>a  :<C-u>CocList diagnostics<cr>
+" Manage extensions
+nnoremap <silent> <space>e  :<C-u>CocList extensions<cr>
+" Show commands
+nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
+" Find symbol of current document
+nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+" Search workspace symbols
+nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent> <space>j  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
+" Resume latest coc list
+nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+
+" disable vim-go :GoDef short cut (gd)
+" this is handled by LanguageClient [LC]
+let g:go_def_mapping_enabled = 0
+
+
+
 
 set fileformats=unix,dos,mac
 set showcmd
@@ -550,14 +621,18 @@ let g:tagbar_type_go = {
 
 " vim-go
 " run :GoBuild or :GoTestCompile based on the go file
-function! s:build_go_files()
-  let l:file = expand('%')
-  if l:file =~# '^\f\+_test\.go$'
-    call go#cmd#Test(0, 1)
-  elseif l:file =~# '^\f\+\.go$'
-    call go#cmd#Build(0)
-  endif
-endfunction
+"function! s:build_go_files()
+" let l:file = expand('%')
+" if l:file =~# '^\f\+_test\.go$'
+"   call go#cmd#Test(0, 1)
+" elseif l:file =~# '^\f\+\.go$'
+"   call go#cmd#Build(0)
+" endif
+"ndfunction
+
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
+
 
 let g:go_list_type = "quickfix"
 let g:go_fmt_command = "goimports"
@@ -594,7 +669,7 @@ augroup go
   au Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
   au Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
 
-  au FileType go nmap <Leader>dd <Plug>(go-def-vertical)
+ "" au FileType go nmap <Leader>dd <Plug>(go-def-vertical)
   au FileType go nmap <Leader>dv <Plug>(go-doc-vertical)
   au FileType go nmap <Leader>db <Plug>(go-doc-browser)
 
@@ -607,12 +682,9 @@ augroup go
   au FileType go imap <C-g> <esc>:<C-u>GoDecls<cr>
   au FileType go nmap <leader>rb :<C-u>call <SID>build_go_files()<CR>
 
-  "au FileType go nmap <Leader>i <Plug>(go-info)
-  au FileType go nmap <Leader>gd <Plug>(go-doc)
-  "au FileType go nmap <Leader>r <Plug>(go-run)
+ "" au FileType go nmap <Leader>gd <Plug>(go-doc)
   au FileType go nmap <Leader>b <Plug>(go-build)
-  "au FileType go nmap <Leader>t <Plug>(go-test)
-  au FileType go nmap gd <Plug>(go-def-tab)
+  "au FileType go nmap gd <Plug>(go-def-tab)
 
 augroup END
 
